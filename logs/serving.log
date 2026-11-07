@@ -1,0 +1,9 @@
+07-11-2026 17:52:46|ERROR|serving|Base indisponible (localhost:3306) : (2059, "Authentication plugin 'b'auth_gssapi_client'' not configured")
+07-11-2026 17:52:47|ERROR|serving|Base indisponible (localhost:3306) : (2059, "Authentication plugin 'b'auth_gssapi_client'' not configured")
+07-11-2026 17:52:47|WARNING|serving|Dashboard affiché sans données (base indisponible)
+07-11-2026 17:53:03|ERROR|serving|Requête top_ips échouée : (1146, "Table 'auth_logs' doesn't exist")
+07-11-2026 17:53:03|ERROR|serving|Erreur matplotlib (draw_barh, graphique 4) : invalid literal for int() with base 10: 'pas un nombre'
+07-11-2026 17:53:23|ERROR|serving|Base indisponible (localhost:3306) : (2059, "Authentication plugin 'b'auth_gssapi_client'' not configured")
+07-11-2026 17:53:23|WARNING|serving|Dashboard affiché sans données (base indisponible)
+07-11-2026 17:53:31|ERROR|serving|Base indisponible (localhost:3306) : (2059, "Authentication plugin 'b'auth_gssapi_client'' not configured")
+07-11-2026 17:53:31|WARNING|serving|Dashboard affiché sans données (base indisponible)

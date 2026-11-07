@@ -2,8 +2,16 @@ import requests
 
 URL_INFO='https://ipinfo.io'
 
+"""
+in : ip
+out : dict (ip, city, region, country, loc, org, timezone) or None
+"""
 def get_location(ip):
-    response = requests.get(URL_INFO+'/'+ip+'/json')
+    try:
+        response = requests.get(URL_INFO+'/'+ip+'/json',timeout=5)
+    except requests.RequestException as e:
+        print(e)
+        return
     if response.status_code == 200 :
         return response.json()
 

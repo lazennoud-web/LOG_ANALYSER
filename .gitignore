@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Local
+storage/mysql_config.json
+storage/test.csv

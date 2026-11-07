@@ -302,6 +302,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "matplotlib" },
     { name = "psycopg2-binary" },
+    { name = "pymysql" },
     { name = "requests" },
 ]
 
@@ -309,6 +310,7 @@ dependencies = [
 requires-dist = [
     { name = "matplotlib", specifier = ">=3.11.2" },
     { name = "psycopg2-binary", specifier = ">=2.9.13" },
+    { name = "pymysql", specifier = ">=1.2.3" },
     { name = "requests", specifier = ">=2.34.2" },
 ]
 
@@ -497,6 +499,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/36/fa/ed742cd4e5dbddcb44702f9c4a97f7f5b62d97e3d9d00907ecc8ac750ef4/psycopg2_binary-2.9.13-cp315-cp315-musllinux_1_2_riscv64.whl", hash = "sha256:6ede8595767e19d30a7e8a84a7d47bfde6176d45d194fed08dbb68d1584a780b", size = 3055143, upload-time = "2026-09-09T23:56:17.168Z" },
     { url = "https://files.pythonhosted.org/packages/d5/3a/5c2cb71a844ee236be2ce91b286d797e34a21489909357c7cfba0f5c0197/psycopg2_binary-2.9.13-cp315-cp315-musllinux_1_2_x86_64.whl", hash = "sha256:0ebcf3c4266a695df9d0ef51296155f60c86ac51cf82f0d0dd2e827255a891c5", size = 3355374, upload-time = "2026-09-09T23:56:18.793Z" },
     { url = "https://files.pythonhosted.org/packages/e8/30/3991c9fdcca90a5a1e55435292f4d74d176da2be15f3998f6858da3658cc/psycopg2_binary-2.9.13-cp315-cp315-win_amd64.whl", hash = "sha256:1752b9821f1377404d65ac43af03d59a1eccc57fb2c1eb8305f9a3fe8eb7a8ba", size = 2867246, upload-time = "2026-09-09T23:56:20.501Z" },
+]
+
+[[package]]
+name = "pymysql"
+version = "1.2.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b1/d4/c15b459e25a23767d2f4065ef40968920320f04e302889574310c21c96a3/pymysql-1.2.3.tar.gz", hash = "sha256:d5b288529782e536ae171866df3ca9dc4f6cbfb3cc2f18e6f837fbb90dbc262b", size = 50629, upload-time = "2026-09-17T12:22:49.146Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a9/4b/0a906d8184f011ff8dbd4722743783867589b33269d2c5fff238d636fdcb/pymysql-1.2.3-py3-none-any.whl", hash = "sha256:14f1c68e2ed859243ae5ca41ffbe677027fc46bc136a9f0be8a4e928e5e7415a", size = 46740, upload-time = "2026-09-17T12:22:47.826Z" },
 ]
 
 [[package]]
