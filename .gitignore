@@ -12,3 +12,5 @@ wheels/
 # Local
 storage/mysql_config.json
 storage/test.csv
+.env
+logs/
