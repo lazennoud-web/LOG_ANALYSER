@@ -12,10 +12,10 @@ Le projet permet notamment de voir les tentatives de connexion échouées, les c
 
 Le projet est organisé en plusieurs dossiers et fichiers :
 
-- `data/` : contient les fichiers de logs à analyser.
-- `ingestion/` : permet de lire les fichiers de logs.
-- `processing/` : contient le code qui extrait et transforme les informations.
-- `storage/` : s'occupe de la connexion à la base de données et de l'enregistrement des données.
+- `data/` : (les donnees sources , c'est le dossier qui contient les fichiers de logs SSH qu'on veut analyser (auth.log1 , auth.log2 etc))
+- `ingestion/` : la recuperation des donnees , afin de pouvoir les traiter ( il contient le code qui: ouvre les fichiers de logs , lit leur contenu , recupere les lignes une par une )
+- `processing/` : transformer les lignes brutes en informations structurées et exploitables.
+- `storage/` : stocke les donnees ,s'occupe de la connexion à la base de données et de l'enregistrement des données.
 - `serving/` : prépare les données et affiche les graphiques.
 - `logs/` : contient les journaux de l'application.
 - `main.py` : permet de lancer le projet.
@@ -30,6 +30,12 @@ Il faut ensuite installer les bibliothèques nécessaires :
 
 ```bash
 pip install matplotlib psycopg2-binary python-dotenv
+matplotlib : c est la biblio python qui permet de creer des graphiques er des visualisations 
+
+psychipg2-binary : c une biblio python qui permet de postgreSQL
+
+python-dotenv : Charger les paramètres du fichier .env 
+
 ```
 
 ## Configuration

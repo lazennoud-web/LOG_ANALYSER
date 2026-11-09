@@ -10,6 +10,7 @@ from storage import dal, schema
 from storage.database import Database
 
 
+# ltrouver le  pays correspondant à chaque ip (un seul appel par ip)
 def locate(ips:list[str])->dict:
     """ip -> pays avec ipinfo (un seul appel par ip)"""
     countries = {}
@@ -20,6 +21,7 @@ def locate(ips:list[str])->dict:
     print()
     return countries
 
+#realiser l'importation des données dans PostgreSQL
 
 def import_data(geo:bool=True)->None:
     rows = [extract_transforme.exctract_from_row(row) for row in raw.to_rows()]
@@ -38,6 +40,8 @@ def import_data(geo:bool=True)->None:
     finally:
         Database.close()
 
+
+#mode import ou mode dashboard
 
 if __name__ == "__main__":
     command = sys.argv[1] if len(sys.argv) > 1 else ''
