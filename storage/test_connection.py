@@ -26,5 +26,20 @@ def test_connection()->bool:
     finally:
         Database.close()
 
+def check_connection():
+    connection = Database.getConnection()
+    if connection is None:
+        logger.error('Connexion PostgreSQL impossible')
+        return False
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+            result = cursor.fetchone()
+        logger.info(f'Connexion PostgreSQL OK : {result}')
+        return True
+    finally:
+        Database.close()
+
+
 if __name__ == '__main__':
-    test_connection()
+    print('Connexion OK ? ', check_connection())

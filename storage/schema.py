@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 import psycopg2
 from psycopg2 import sql
-sys.path.append(str(Path(__file__).resolve().parent.parent))#racine du projet : log_analysis
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 import config
 from storage.database import Database, connect, rollback, logger
 
@@ -23,14 +23,12 @@ CREATE TABLE IF NOT EXISTS t_ssh_events (
     country VARCHAR(100)
 )
 """
-#INET : PostgreSQL refuse une IP invalide ; CHECK : refuse un statut ou un port incorrect
 CREATE_INDEXES = [
     'CREATE INDEX IF NOT EXISTS idx_status ON t_ssh_events (status)',
     'CREATE INDEX IF NOT EXISTS idx_country ON t_ssh_events (country)',
     'CREATE INDEX IF NOT EXISTS idx_username ON t_ssh_events (username)',
     'CREATE INDEX IF NOT EXISTS idx_date_time ON t_ssh_events (date_time)',
 ]
-#COMMENT ON : description affichée dans DBeaver (onglet Propriétés de la table / des colonnes)
 COMMENTS = [
     "COMMENT ON TABLE t_ssh_events IS 'Tentatives de connexion SSH (Failed/Accepted) extraites des fichiers auth.log'",
     "COMMENT ON COLUMN t_ssh_events.date_time IS 'Date et heure de la tentative (année ajoutée par le pipeline)'",
@@ -42,7 +40,6 @@ COMMENTS = [
     "COMMENT ON COLUMN t_ssh_events.port IS 'Port source'",
     "COMMENT ON COLUMN t_ssh_events.country IS 'Code pays ipinfo (ex : CN, US) ; NULL si non géolocalisé'",
 ]
-#vues = mêmes calculs que storage/queries.py, pour consulter les résultats du dashboard directement dans DBeaver
 CREATE_VIEWS = [
     """CREATE OR REPLACE VIEW v_failed_by_country AS
        SELECT COALESCE(NULLIF(country, ''), 'Inconnu') AS pays, COUNT(*) AS total
@@ -63,17 +60,65 @@ CREATE_VIEWS = [
        FROM t_ssh_events""",
 ]
 
+
+def ensure_schema_ownership(connection)->None:
+    """Corrige le propriétaire du schéma public si l’objet a été créé par un autre utilisateur."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT pg_get_userbyid(n.nspowner) FROM pg_namespace n WHERE n.nspname = 'public'")
+            owner = cursor.fetchone()
+            if owner and owner[0] != config.PG_USER:
+                cursor.execute(sql.SQL('ALTER SCHEMA {} OWNER TO {}').format(
+                    sql.Identifier('public'),
+                    sql.Identifier(config.PG_USER),
+                ))
+                logger.warning(f'Schéma public réattribué à {config.PG_USER}')
+            cursor.execute(sql.SQL('GRANT ALL ON SCHEMA {} TO {}').format(
+                sql.Identifier('public'),
+                sql.Identifier(config.PG_USER),
+            ))
+    except psycopg2.Error as e:
+        logger.warning(f'Impossible de corriger le propriétaire du schéma public : {e}')
+
+
+def ensure_object_ownership(connection)->None:
+    """Force le propriétaire de la table et des vues sur le rôle courant."""
+    objects = {
+        't_ssh_events': 'TABLE',
+        'v_failed_by_country': 'VIEW',
+        'v_success_by_user': 'VIEW',
+        'v_failed_invalid_users': 'VIEW',
+        'v_summary': 'VIEW',
+    }
+    try:
+        with connection.cursor() as cursor:
+            for obj, kind in objects.items():
+                cursor.execute("SELECT to_regclass(%s)", (f'public.{obj}',))
+                if cursor.fetchone()[0] is None:
+                    continue
+                if kind == 'TABLE':
+                    cursor.execute(sql.SQL('ALTER TABLE {} OWNER TO {}').format(
+                        sql.Identifier('public', obj),
+                        sql.Identifier(config.PG_USER),
+                    ))
+                else:
+                    cursor.execute(sql.SQL('ALTER VIEW {} OWNER TO {}').format(
+                        sql.Identifier('public', obj),
+                        sql.Identifier(config.PG_USER),
+                    ))
+    except psycopg2.Error as e:
+        logger.warning(f'Impossible de corriger les propriétaires des objets PostgreSQL : {e}')
+
+
 def create_database()->bool:
-    """crée la base si elle n'existe pas, puis la table"""
-    connection = connect('postgres')#base de maintenance, toujours présente
+    connection = connect('postgres')
     if connection is None:
         return False
-    connection.autocommit = True#CREATE DATABASE est interdit dans une transaction
+    connection.autocommit = True
     try:
         with connection.cursor() as cursor:
             cursor.execute('SELECT 1 FROM pg_database WHERE datname = %s', (config.PG_DBNAME,))
             if cursor.fetchone() is None:
-                #un nom de base ne peut pas être passé avec %s : sql.Identifier l'échappe sans concaténation
                 cursor.execute(sql.SQL('CREATE DATABASE {}').format(sql.Identifier(config.PG_DBNAME)))
                 logger.info(f'Base {config.PG_DBNAME} créée')
             else:
@@ -85,15 +130,23 @@ def create_database()->bool:
         connection.close()
     return create_tables()
 
+
 def create_tables()->bool:
     connection = Database.getConnection()
     if connection is None:
         return False
     try:
+        ensure_schema_ownership(connection)
         with connection.cursor() as cursor:
             cursor.execute(CREATE_TABLE)
-            for query in CREATE_INDEXES + COMMENTS + CREATE_VIEWS:
+            for query in CREATE_INDEXES:
                 cursor.execute(query)
+            ensure_object_ownership(connection)
+            for query in COMMENTS + CREATE_VIEWS:
+                try:
+                    cursor.execute(query)
+                except psycopg2.Error as e:
+                    logger.warning(f'Commande SQL ignorée car l’objet existe avec un propriétaire différent : {e}')
         connection.commit()
         logger.info('Table t_ssh_events + vues prêtes')
         return True
@@ -101,6 +154,7 @@ def create_tables()->bool:
         rollback(connection)
         logger.error(f'Création de la table t_ssh_events échouée : {e}')
         return False
+
 
 if __name__ == '__main__':
     print('Création db + table :', create_database())
